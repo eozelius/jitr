@@ -1,8 +1,6 @@
 package com.ethanoz.jitr.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +19,8 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
+    private String email;
+
 //    @Lob
 //    @Type(type="org.hibernate.type.BinaryType")
 //    private byte[] photo;
@@ -32,6 +32,16 @@ public class User {
             orphanRemoval = true
     )
     private List<Post> posts = new ArrayList<>();
+
+    // getters and setters
+    public void addPost(final Post post) {
+        if (posts.contains(post)) {
+            System.out.println("[User.java] addPost() warning: user already contains this post.");
+            return;
+        }
+        posts.add(post);
+        post.setUser(this);
+    }
 
     public Long getId() {
         return id;
@@ -45,24 +55,40 @@ public class User {
         return firstName;
     }
 
-    public void setFirst_name(String firstName) {
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
-    public String getLast_name() {
+    public String getLastName() {
         return lastName;
     }
 
-    public void setLast_name(String lastName) {
+    public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public void addPost(final Post post) {
-        posts.add(post);
-        post.setUser(this);
     }
 
     public List<Post> getPosts () {
         return posts;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    // overrides
+
+    @Override
+    public String toString() {
+        return new String(
+                "\n User => { " +
+                        "\n  id:" + this.id +
+                        "\n  firstName: " + this.firstName +
+                        "\n  lastName: " + this.lastName +
+                        "\n}"
+        );
     }
 }

@@ -1,14 +1,12 @@
 package com.ethanoz.jitr.controllers;
 
 import com.ethanoz.jitr.models.User;
+import com.ethanoz.jitr.models.Post;
 import com.ethanoz.jitr.repositories.UserRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.Entity;
 import java.util.List;
 
 @RestController
@@ -28,9 +26,42 @@ public class UsersController {
     @GetMapping
     @RequestMapping("{id}")
     public User user (@PathVariable Long id) {
-        User u = userRepository.getOne(id);
-        System.out.println("u => " + u);
-        System.out.println("u => " + u.getPosts());
-        return u;
+        User user = userRepository.getOne(id);
+        return user;
+    }
+
+    // POST create a new user
+    @RequestMapping
+    public User create (@RequestBody User user) {
+        return userRepository.saveAndFlush(user);
+    }
+
+    /**
+     * POST create a new User Post.
+     *
+     * @PathVariable { Long } userId - id of the User who is adding the new post
+     * @RequestBody { Post } post - post to be created, does not yet exist in db
+     * @return { User } user - user object with freshly saved post.
+     */
+    @RequestMapping(value = "{userId}/posts", method = RequestMethod.POST)
+    public User createPost (@PathVariable Long userId, @RequestBody Post post) {
+        User user = userRepository.getOne(userId);
+        user.addPost(post);
+        return userRepository.saveAndFlush(user);
+    }
+
+    // PUT update a user
+    @RequestMapping (value = "{id}", method = RequestMethod.PUT)
+    public User update (@PathVariable Long id, @RequestBody User user) {
+        User userToUpdate = userRepository.getOne(id);
+        BeanUtils.copyProperties(user, userToUpdate, "id");
+        return userRepository.saveAndFlush(userToUpdate);
+    }
+
+    // DELETE a user
+    @RequestMapping(value = "{id}", method = RequestMethod.DELETE)
+    public void delete (@PathVariable Long id) {
+        User user = userRepository.getOne(id);
+        userRepository.delete(user);
     }
 }
